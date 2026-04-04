@@ -31,7 +31,7 @@ export function AdminLive() {
           <label className="relative inline-flex items-center cursor-pointer">
             <input 
               type="checkbox" 
-              className="sr-only peer" 
+              className="sr-only peer tv-focusable" 
               checked={formData.isLive}
               onChange={(e) => setFormData({ ...formData, isLive: e.target.checked })}
             />
@@ -47,7 +47,7 @@ export function AdminLive() {
               type="text" 
               value={formData.title} 
               onChange={e => setFormData({...formData, title: e.target.value})} 
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" 
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner tv-focusable" 
             />
           </div>
           <div>
@@ -57,7 +57,7 @@ export function AdminLive() {
               type="url" 
               value={formData.url} 
               onChange={e => setFormData({...formData, url: e.target.value})} 
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" 
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner tv-focusable" 
             />
           </div>
           <div>
@@ -67,13 +67,13 @@ export function AdminLive() {
               rows={3} 
               value={formData.description} 
               onChange={e => setFormData({...formData, description: e.target.value})} 
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" 
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner tv-focusable" 
             />
           </div>
         </div>
 
         <div className="pt-6 border-t border-slate-800/50 flex justify-end">
-          <button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-0.5">
+          <button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 tv-focusable">
             <Save className="w-4 h-4" />
             Salvar Alterações
           </button>

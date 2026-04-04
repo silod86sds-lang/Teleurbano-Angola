@@ -39,7 +39,7 @@ export function AdminLayout() {
                   key={item.name}
                   to={item.path}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 tv-focusable",
                     isActive
                       ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/20"
                       : "text-slate-400 hover:bg-slate-800/80 hover:text-white"
