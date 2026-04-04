@@ -9,8 +9,8 @@ export function Navbar() {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Início', path: '/', icon: Tv },
-    { name: 'Ao Vivo', path: '/live', icon: Radio },
+    { name: 'Ao Vivo', path: '/', icon: Radio },
+    { name: 'Vídeos', path: '/videos', icon: Tv },
     { name: 'Sobre', path: '/about', icon: Info },
   ];
 

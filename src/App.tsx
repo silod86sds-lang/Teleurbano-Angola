@@ -32,9 +32,9 @@ export default function App() {
             <div className="relative z-10">
               <Navbar />
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Live />} />
+                <Route path="/videos" element={<Home />} />
                 <Route path="/video/:id" element={<VideoPlayer />} />
-                <Route path="/live" element={<Live />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/subscribe" element={<Subscribe />} />

@@ -12,7 +12,7 @@ export function VideoPlayer() {
   const video = videos.find(v => v.id === id);
 
   if (!video) {
-    return <Navigate to="/" />;
+    return <Navigate to="/videos" />;
   }
 
   const canWatch = !video.isPremium || user?.isPremium || user?.role === 'admin';

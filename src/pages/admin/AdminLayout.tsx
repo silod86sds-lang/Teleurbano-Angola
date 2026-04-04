@@ -9,7 +9,7 @@ export function AdminLayout() {
   const location = useLocation();
 
   if (!user || user.role !== 'admin') {
-    return <Navigate to="/" />;
+    return <Navigate to="/videos" />;
   }
 
   const menuItems = [
