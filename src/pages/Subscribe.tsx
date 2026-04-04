@@ -62,7 +62,7 @@ export function Subscribe() {
           {user?.isPremium ? (
             <button
               disabled
-              className="w-full py-4 px-6 rounded-xl text-slate-400 font-bold text-lg bg-slate-800 cursor-not-allowed flex items-center justify-center gap-2 border border-slate-700"
+              className="w-full py-4 px-6 rounded-xl text-slate-400 font-bold text-lg bg-slate-800 cursor-not-allowed flex items-center justify-center gap-2 border border-slate-700 tv-focusable"
             >
               <CheckCircle2 className="w-6 h-6" />
               Você já é Premium
@@ -70,7 +70,7 @@ export function Subscribe() {
           ) : (
             <button
               onClick={handleSubscribe}
-              className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2"
+              className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 tv-focusable"
             >
               <Crown className="w-6 h-6" />
               Assinar Agora

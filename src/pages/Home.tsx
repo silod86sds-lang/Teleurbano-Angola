@@ -31,7 +31,7 @@ export function Home() {
             placeholder="Buscar vídeos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-9 pr-3 py-2 border border-slate-700/50 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:bg-slate-800/80 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition-all shadow-lg shadow-black/20"
+            className="block w-full pl-9 pr-3 py-2 border border-slate-700/50 rounded-xl leading-5 bg-slate-900/50 backdrop-blur-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:bg-slate-800/80 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition-all shadow-lg shadow-black/20 tv-focusable"
           />
         </div>
       </div>
@@ -41,7 +41,7 @@ export function Home() {
           <Link
             key={video.id}
             to={`/video/${video.id}`}
-            className="group flex flex-col bg-slate-900/60 backdrop-blur-sm rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgba(59,130,246,0.2)]"
+            className="group flex flex-col bg-slate-900/60 backdrop-blur-sm rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgba(59,130,246,0.2)] tv-focusable"
           >
             <div className="relative aspect-video overflow-hidden bg-slate-800">
               <img

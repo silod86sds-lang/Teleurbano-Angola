@@ -32,16 +32,18 @@ export function Live() {
                   src={liveStream.url}
                   controls
                   autoPlay
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain tv-focusable"
+                  tabIndex={0}
                 >
                   Seu navegador não suporta o elemento de vídeo.
                 </video>
               ) : (
                 <iframe
                   src={liveStream.url}
-                  className="w-full h-full border-0"
+                  className="w-full h-full border-0 tv-focusable"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
+                  tabIndex={0}
                 ></iframe>
               )
             ) : (
@@ -82,9 +84,9 @@ export function Live() {
               <input
                 type="text"
                 placeholder="Digite uma mensagem..."
-                className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable"
               />
-              <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20">
+              <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 tv-focusable">
                 Enviar
               </button>
             </div>

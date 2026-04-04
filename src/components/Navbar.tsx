@@ -24,7 +24,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2 group tv-focusable rounded-lg p-1">
               <div className="bg-white p-1 rounded-lg shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all">
                 <img src="/logo.png" alt="Teleurbano Angola tv" className="h-8 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
                 <Tv className="h-6 w-6 text-blue-800 hidden" />
@@ -41,7 +41,7 @@ export function Navbar() {
                       key={item.name}
                       to={item.path}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300",
+                        "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 tv-focusable",
                         isActive
                           ? "bg-blue-600/20 text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
@@ -61,7 +61,7 @@ export function Navbar() {
                 {!user.isPremium && user.role !== 'admin' && (
                   <Link
                     to="/subscribe"
-                    className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-amber-600 hover:to-orange-700 transition-all"
+                    className="hidden md:flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-amber-600 hover:to-orange-700 transition-all tv-focusable"
                   >
                     <Crown className="h-4 w-4" />
                     Seja Premium
@@ -75,7 +75,7 @@ export function Navbar() {
                 </div>
                 <button
                   onClick={logout}
-                  className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors"
+                  className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors tv-focusable"
                   title="Sair"
                 >
                   <LogOut className="h-5 w-5" />
@@ -84,7 +84,7 @@ export function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors tv-focusable"
               >
                 <LogIn className="h-4 w-4" />
                 Entrar

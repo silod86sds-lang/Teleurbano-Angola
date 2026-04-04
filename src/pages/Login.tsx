@@ -46,7 +46,7 @@ export function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-4 py-3 border border-slate-700 bg-slate-950 placeholder-slate-500 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-inner"
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-700 bg-slate-950 placeholder-slate-500 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-inner tv-focusable"
                 placeholder="seu@email.com"
               />
               <p className="mt-2 text-xs text-slate-500 font-medium">
@@ -61,7 +61,7 @@ export function Login() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as Role)}
-                className="appearance-none relative block w-full px-4 py-3 border border-slate-700 bg-slate-950 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-inner"
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-700 bg-slate-950 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-inner tv-focusable"
               >
                 <option value="user">Usuário Comum</option>
                 <option value="admin">Administrador</option>
@@ -72,7 +72,7 @@ export function Login() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-blue-500/30 hover:-translate-y-0.5"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-blue-500/30 hover:-translate-y-0.5 tv-focusable"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-4">
                 <LogIn className="h-5 w-5 text-blue-300 group-hover:text-white transition-colors" aria-hidden="true" />

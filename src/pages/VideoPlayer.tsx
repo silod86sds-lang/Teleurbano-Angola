@@ -25,8 +25,9 @@ export function VideoPlayer() {
             src={video.url}
             controls
             autoPlay
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain tv-focusable"
             poster={video.thumbnailUrl}
+            tabIndex={0}
           >
             Seu navegador não suporta o elemento de vídeo.
           </video>
@@ -42,7 +43,7 @@ export function VideoPlayer() {
             {user ? (
               <Link
                 to="/subscribe"
-                className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:-translate-y-1"
+                className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:-translate-y-1 tv-focusable"
               >
                 <Crown className="w-6 h-6" />
                 Assinar Premium
@@ -50,7 +51,7 @@ export function VideoPlayer() {
             ) : (
               <Link
                 to="/login"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-1"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-bold hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-1 tv-focusable"
               >
                 Fazer Login
               </Link>

@@ -7,6 +7,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
+import { useTVNavigation } from './hooks/useTVNavigation';
 
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -22,6 +23,8 @@ import { AdminLive } from './pages/admin/AdminLive';
 import { AdminUsers } from './pages/admin/AdminUsers';
 
 export default function App() {
+  useTVNavigation();
+
   return (
     <AuthProvider>
       <DataProvider>
