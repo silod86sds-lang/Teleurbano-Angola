@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { Video, Plus, Trash2, Edit, Upload, Link as LinkIcon, Loader2 } from 'lucide-react';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../firebase';
+import { Video, Plus, Trash2, Link as LinkIcon } from 'lucide-react';
 
 export function AdminVideos() {
   const { videos, addVideo, deleteVideo } = useData();
   const [isAdding, setIsAdding] = useState(false);
-  const [uploadType, setUploadType] = useState<'url' | 'file'>('url');
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -20,60 +14,11 @@ export function AdminVideos() {
     isPremium: false,
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setVideoFile(e.target.files[0]);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    let finalUrl = formData.url;
-
-    if (uploadType === 'file' && videoFile) {
-      setIsUploading(true);
-      
-      try {
-        const storageRef = ref(storage, `videos/${Date.now()}_${videoFile.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, videoFile);
-
-        finalUrl = await new Promise((resolve, reject) => {
-          uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadProgress(Math.round(progress));
-            },
-            (error) => {
-              console.error("Upload failed:", error);
-              reject(error);
-            },
-            async () => {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve(downloadURL);
-            }
-          );
-        });
-      } catch (error: any) {
-        console.error("Upload failed:", error);
-        if (error.code === 'storage/unauthorized') {
-          alert('Erro de permissão: Você não tem permissão para fazer upload. Verifique as regras de segurança do Firebase Storage no console do Firebase.');
-        } else {
-          alert(`Erro ao fazer upload do vídeo: ${error.message || 'Tente novamente.'}`);
-        }
-        setIsUploading(false);
-        return;
-      }
-      
-      setIsUploading(false);
-      setUploadProgress(0);
-    }
-
-    addVideo({ ...formData, url: finalUrl });
+    addVideo({ ...formData });
     setIsAdding(false);
     setFormData({ title: '', description: '', url: '', thumbnailUrl: '', isPremium: false });
-    setVideoFile(null);
   };
 
   return (
@@ -101,50 +46,13 @@ export function AdminVideos() {
               <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">Fonte do Vídeo</label>
-              <div className="flex bg-slate-950 border border-slate-700 rounded-xl p-1 mb-3">
-                <button
-                  type="button"
-                  onClick={() => setUploadType('url')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all tv-focusable ${uploadType === 'url' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  <LinkIcon className="w-4 h-4" />
-                  URL Externa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUploadType('file')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all tv-focusable ${uploadType === 'file' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload de Arquivo
-                </button>
-              </div>
-
-              {uploadType === 'url' ? (
-                <input required type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({...formData, url: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable" />
-              ) : (
-                <div className="relative">
-                  <input 
-                    required={uploadType === 'file' && !videoFile} 
-                    type="file" 
-                    accept="video/mp4,video/webm" 
-                    onChange={handleFileChange} 
-                    className="block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-600/20 file:text-blue-400 hover:file:bg-blue-600/30 transition-all tv-focusable" 
-                  />
-                  {isUploading && (
-                    <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center z-10 border border-slate-700">
-                      <div className="flex items-center gap-2 text-blue-400 mb-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm font-medium">Enviando para a nuvem... {uploadProgress}%</span>
-                      </div>
-                      <div className="w-3/4 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 transition-all duration-200" style={{ width: `${uploadProgress}%` }}></div>
-                      </div>
-                    </div>
-                  )}
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">URL do Vídeo</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <LinkIcon className="h-5 w-5 text-slate-500" />
                 </div>
-              )}
+                <input required type="url" placeholder="https://..." value={formData.url} onChange={e => setFormData({...formData, url: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-1.5">URL da Thumbnail (Imagem)</label>
@@ -167,8 +75,8 @@ export function AdminVideos() {
           </div>
           <div className="flex justify-end gap-3 pt-5 border-t border-slate-800/50 mt-6">
             <button type="button" onClick={() => setIsAdding(false)} className="px-5 py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors tv-focusable">Cancelar</button>
-            <button type="submit" disabled={isUploading} className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 tv-focusable disabled:opacity-50 disabled:cursor-not-allowed">
-              {isUploading ? 'Enviando...' : 'Salvar Vídeo'}
+            <button type="submit" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:from-blue-500 hover:to-blue-600 transition-all shadow-lg shadow-blue-500/20 tv-focusable">
+              Salvar Vídeo
             </button>
           </div>
         </form>

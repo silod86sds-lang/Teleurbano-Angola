@@ -1,16 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { 
-  collection, 
-  doc, 
-  onSnapshot, 
-  addDoc, 
-  deleteDoc, 
-  updateDoc,
-  setDoc,
-  query,
-  orderBy
-} from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 
 export interface Video {
@@ -51,134 +39,97 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
-}
-
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: any;
-}
-
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, user: any) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: user?.id,
-      email: user?.email,
-    },
-    operationType,
-    path
+// Mock initial data
+const defaultVideos: Video[] = [
+  {
+    id: '1',
+    title: 'Exemplo de Vídeo MP4',
+    description: 'Um vídeo de exemplo em formato MP4.',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+    isPremium: false,
+    createdAt: Date.now()
   }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
+];
+
+const defaultLiveStream: LiveStream = {
+  isLive: true,
+  title: 'TELEURBANO ANGOLA Ao Vivo',
+  description: 'Acompanhe a nossa programação ao vivo.',
+  url: 'https://vdo.ninja/?view=W9kTD5t',
+};
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [videos, setVideos] = useState<Video[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [liveStream, setLiveStream] = useState<LiveStream>({
-    isLive: true,
-    title: 'TELEURBANO ANGOLA Ao Vivo',
-    description: 'Acompanhe a nossa programação ao vivo.',
-    url: 'https://vdo.ninja/?view=W9kTD5t',
-  });
+  const [liveStream, setLiveStream] = useState<LiveStream>(defaultLiveStream);
   
-  const { isAuthReady, user } = useAuth();
+  const { isAuthReady } = useAuth();
 
   useEffect(() => {
     if (!isAuthReady) return;
 
-    const qVideos = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
-    const unsubVideos = onSnapshot(qVideos, (snapshot) => {
-      const vids: Video[] = [];
-      snapshot.forEach((doc) => {
-        vids.push({ id: doc.id, ...doc.data() } as Video);
-      });
-      setVideos(vids);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'videos', user);
-    });
-
-    const qNotices = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
-    const unsubNotices = onSnapshot(qNotices, (snapshot) => {
-      const nots: Notice[] = [];
-      snapshot.forEach((doc) => {
-        nots.push({ id: doc.id, ...doc.data() } as Notice);
-      });
-      setNotices(nots);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'notices', user);
-    });
-
-    const liveRef = doc(db, 'settings', 'liveStream');
-    const unsubLive = onSnapshot(liveRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setLiveStream(docSnap.data() as LiveStream);
+    const storedVideos = localStorage.getItem('mock_videos');
+    if (storedVideos) {
+      try {
+        setVideos(JSON.parse(storedVideos));
+      } catch (e) {
+        setVideos(defaultVideos);
       }
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, 'settings/liveStream', user);
-    });
+    } else {
+      setVideos(defaultVideos);
+      localStorage.setItem('mock_videos', JSON.stringify(defaultVideos));
+    }
 
-    return () => {
-      unsubVideos();
-      unsubNotices();
-      unsubLive();
-    };
-  }, [isAuthReady, user]);
+    const storedNotices = localStorage.getItem('mock_notices');
+    if (storedNotices) {
+      try {
+        setNotices(JSON.parse(storedNotices));
+      } catch (e) {
+        setNotices([]);
+      }
+    }
+
+    const storedLiveStream = localStorage.getItem('mock_liveStream');
+    if (storedLiveStream) {
+      try {
+        setLiveStream(JSON.parse(storedLiveStream));
+      } catch (e) {
+        setLiveStream(defaultLiveStream);
+      }
+    }
+  }, [isAuthReady]);
 
   const addVideo = async (video: Omit<Video, 'id' | 'createdAt'>) => {
-    try {
-      await addDoc(collection(db, 'videos'), {
-        ...video,
-        createdAt: Date.now(),
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'videos', user);
-    }
+    const newVideo = { ...video, id: Date.now().toString(), createdAt: Date.now() };
+    const updated = [newVideo, ...videos];
+    setVideos(updated);
+    localStorage.setItem('mock_videos', JSON.stringify(updated));
   };
 
   const deleteVideo = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'videos', id));
-    } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `videos/${id}`, user);
-    }
+    const updated = videos.filter(v => v.id !== id);
+    setVideos(updated);
+    localStorage.setItem('mock_videos', JSON.stringify(updated));
   };
 
   const addNotice = async (notice: Omit<Notice, 'id' | 'createdAt'>) => {
-    try {
-      await addDoc(collection(db, 'notices'), {
-        ...notice,
-        createdAt: Date.now(),
-      });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'notices', user);
-    }
+    const newNotice = { ...notice, id: Date.now().toString(), createdAt: Date.now() };
+    const updated = [newNotice, ...notices];
+    setNotices(updated);
+    localStorage.setItem('mock_notices', JSON.stringify(updated));
   };
 
   const deleteNotice = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'notices', id));
-    } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `notices/${id}`, user);
-    }
+    const updated = notices.filter(n => n.id !== id);
+    setNotices(updated);
+    localStorage.setItem('mock_notices', JSON.stringify(updated));
   };
 
   const updateLiveStream = async (data: Partial<LiveStream>) => {
-    try {
-      const liveRef = doc(db, 'settings', 'liveStream');
-      await setDoc(liveRef, { ...liveStream, ...data }, { merge: true });
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, 'settings/liveStream', user);
-    }
+    const updated = { ...liveStream, ...data };
+    setLiveStream(updated);
+    localStorage.setItem('mock_liveStream', JSON.stringify(updated));
   };
 
   return (
@@ -195,3 +146,4 @@ export function useData() {
   }
   return context;
 }
+

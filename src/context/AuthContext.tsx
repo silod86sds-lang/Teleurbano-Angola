@@ -1,12 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth, db } from '../firebase';
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 export type Role = 'admin' | 'user';
 
@@ -34,73 +26,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDocRef = doc(db, 'users', firebaseUser.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (userDoc.exists()) {
-            setUser({ id: firebaseUser.uid, ...userDoc.data() } as User);
-          } else {
-            // Check if default admin
-            const isDefaultAdmin = firebaseUser.email === 'silod86.sds@gmail.com' && firebaseUser.emailVerified;
-            
-            const newUser: User = {
-              id: firebaseUser.uid,
-              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-              email: firebaseUser.email || '',
-              role: isDefaultAdmin ? 'admin' : 'user',
-              isPremium: false,
-              createdAt: Date.now(),
-            };
-            
-            // Save to Firestore
-            const { id, ...userData } = newUser;
-            await setDoc(userDocRef, userData);
-            setUser(newUser);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setUser(null);
-        }
-      } else {
-        setUser(null);
+    const storedUser = localStorage.getItem('mock_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Error parsing stored user", e);
       }
-      setIsAuthReady(true);
-    });
-
-    return () => unsubscribe();
+    }
+    setIsAuthReady(true);
   }, []);
 
   const login = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    }
+    // Mock login as admin
+    const mockUser: User = {
+      id: 'mock-admin-id',
+      name: 'Admin User',
+      email: 'silod86.sds@gmail.com',
+      role: 'admin',
+      isPremium: true,
+      createdAt: Date.now(),
+    };
+    setUser(mockUser);
+    localStorage.setItem('mock_user', JSON.stringify(mockUser));
   };
 
   const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    setUser(null);
+    localStorage.removeItem('mock_user');
   };
 
   const upgradeToPremium = async () => {
     if (user) {
-      try {
-        const userDocRef = doc(db, 'users', user.id);
-        await updateDoc(userDocRef, { isPremium: true });
-        setUser({ ...user, isPremium: true });
-      } catch (error) {
-        console.error("Error upgrading to premium:", error);
-        throw error;
-      }
+      const updatedUser = { ...user, isPremium: true };
+      setUser(updatedUser);
+      localStorage.setItem('mock_user', JSON.stringify(updatedUser));
     }
   };
 
@@ -118,3 +78,4 @@ export function useAuth() {
   }
   return context;
 }
+
