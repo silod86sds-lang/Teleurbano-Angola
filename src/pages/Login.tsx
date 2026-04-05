@@ -24,7 +24,7 @@ export function Login() {
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-red-500 to-amber-500"></div>
         <div className="text-center">
           <div className="mx-auto h-20 w-20 bg-white rounded-2xl flex items-center justify-center mb-6 p-3 shadow-[0_0_30px_rgba(59,130,246,0.3)] ring-4 ring-white/10">
-            <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
+            <img src="https://i.ibb.co/4Z5Vss6p/logo2-png.jpg" alt="Logo" className="h-full w-full object-contain rounded-xl" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
             <Tv className="h-10 w-10 text-blue-800 hidden" />
           </div>
           <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-red-400 to-amber-400">Entrar na Teleurbano Angola</h2>

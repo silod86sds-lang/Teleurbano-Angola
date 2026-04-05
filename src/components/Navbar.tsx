@@ -26,7 +26,7 @@ export function Navbar() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2 group tv-focusable rounded-lg p-1">
               <div className="bg-white p-1 rounded-lg shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all">
-                <img src="/logo.png" alt="Teleurbano Angola tv" className="h-8 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
+                <img src="https://i.ibb.co/4Z5Vss6p/logo2-png.jpg" alt="Teleurbano Angola tv" className="h-8 w-auto object-contain rounded-md" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
                 <Tv className="h-6 w-6 text-blue-800 hidden" />
               </div>
               <span className="text-white font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">Teleurbano Angola</span>

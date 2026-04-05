@@ -6,7 +6,7 @@ export function About() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
         <div className="inline-flex items-center justify-center p-4 bg-white rounded-2xl mb-6 shadow-[0_0_30px_rgba(59,130,246,0.3)] ring-4 ring-white/10">
-          <img src="/logo.png" alt="Logo" className="h-20 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
+          <img src="https://i.ibb.co/4Z5Vss6p/logo2-png.jpg" alt="Logo" className="h-20 w-auto object-contain rounded-xl" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
           <Tv className="w-12 h-12 text-blue-800 hidden" />
         </div>
         <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-red-400 to-amber-400 mb-4">Sobre a Teleurbano Angola</h1>
