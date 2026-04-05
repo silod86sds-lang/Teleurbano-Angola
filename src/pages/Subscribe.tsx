@@ -1,29 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Crown, CheckCircle2 } from 'lucide-react';
+import { Crown, CheckCircle2, MessageCircle, CreditCard, ChevronRight } from 'lucide-react';
 
 export function Subscribe() {
-  const { user, upgradeToPremium } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
 
-  const handleSubscribe = async () => {
+  const handleSubscribeClick = () => {
     if (!user) {
       navigate('/login');
       return;
     }
-    setIsProcessing(true);
-    try {
-      await upgradeToPremium();
-      alert('Assinatura Premium ativada com sucesso!');
-      navigate('/');
-    } catch (error) {
-      console.error("Subscription failed:", error);
-      alert("Ocorreu um erro ao processar sua assinatura. Tente novamente.");
-    } finally {
-      setIsProcessing(false);
-    }
+    setShowPaymentInfo(true);
+  };
+
+  const handleWhatsAppClick = () => {
+    const message = `Olá, aqui está o meu comprovativo de pagamento para o plano Premium. Meu email é: ${user?.email}`;
+    const whatsappUrl = `https://wa.me/244947888735?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const features = [
@@ -59,45 +55,81 @@ export function Subscribe() {
         </div>
 
         <div className="p-10">
-          <ul className="space-y-5 mb-10">
-            {features.map((feature, index) => (
-              <li key={index} className="flex items-start gap-4 text-slate-300 font-medium">
-                <CheckCircle2 className="w-6 h-6 text-green-400 shrink-0 mt-0.5 drop-shadow-[0_0_10px_rgba(74,222,128,0.3)]" />
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
+          {!showPaymentInfo ? (
+            <>
+              <ul className="space-y-5 mb-10">
+                {features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-4 text-slate-300 font-medium">
+                    <CheckCircle2 className="w-6 h-6 text-green-400 shrink-0 mt-0.5 drop-shadow-[0_0_10px_rgba(74,222,128,0.3)]" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
 
-          {user?.isPremium ? (
-            <button
-              disabled
-              className="w-full py-4 px-6 rounded-xl text-slate-400 font-bold text-lg bg-slate-800 cursor-not-allowed flex items-center justify-center gap-2 border border-slate-700 tv-focusable"
-            >
-              <CheckCircle2 className="w-6 h-6" />
-              Você já é Premium
-            </button>
-          ) : (
-            <button
-              onClick={handleSubscribe}
-              disabled={isProcessing}
-              className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 tv-focusable disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isProcessing ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Processando...
-                </span>
+              {user?.isPremium ? (
+                <div className="space-y-4">
+                  <button
+                    disabled
+                    className="w-full py-4 px-6 rounded-xl text-slate-400 font-bold text-lg bg-slate-800 cursor-not-allowed flex items-center justify-center gap-2 border border-slate-700 tv-focusable"
+                  >
+                    <CheckCircle2 className="w-6 h-6" />
+                    Você já é Premium
+                  </button>
+                  {user.premiumUntil && (
+                    <p className="text-center text-sm text-amber-400 font-medium">
+                      Válido até: {new Date(user.premiumUntil).toLocaleDateString('pt-BR')}
+                    </p>
+                  )}
+                </div>
               ) : (
-                <>
+                <button
+                  onClick={handleSubscribeClick}
+                  className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 tv-focusable"
+                >
                   <Crown className="w-6 h-6" />
                   Assinar Agora
-                </>
+                </button>
               )}
-            </button>
+              <p className="text-center text-sm text-slate-500 mt-6 font-medium">
+                Válido por 30 dias após a confirmação.
+              </p>
+            </>
+          ) : (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <CreditCard className="w-6 h-6 text-amber-500" />
+                  Dados de Pagamento
+                </h3>
+                <p className="text-slate-300 mb-4">
+                  Faça o pagamento via <strong>Multicaixa Express</strong> para o número abaixo:
+                </p>
+                <div className="bg-slate-900 p-4 rounded-xl border border-slate-700 flex items-center justify-center mb-6">
+                  <span className="text-3xl font-mono font-bold text-amber-400 tracking-wider">947 888 735</span>
+                </div>
+                
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-400 font-medium">
+                    Após o pagamento, envie o comprovativo pelo WhatsApp para liberação do seu acesso. O plano será válido por 1 mês após a confirmação.
+                  </p>
+                  <button
+                    onClick={handleWhatsAppClick}
+                    className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-[#25D366] hover:bg-[#128C7E] transition-all shadow-[0_0_30px_rgba(37,211,102,0.3)] hover:shadow-[0_0_40px_rgba(37,211,102,0.5)] hover:-translate-y-1 flex items-center justify-center gap-2 tv-focusable"
+                  >
+                    <MessageCircle className="w-6 h-6" />
+                    Enviar Comprovativo
+                  </button>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setShowPaymentInfo(false)}
+                className="w-full text-slate-400 hover:text-white font-medium text-sm transition-colors"
+              >
+                Voltar para os benefícios
+              </button>
+            </div>
           )}
-          <p className="text-center text-sm text-slate-500 mt-6 font-medium">
-            Cancele a qualquer momento.
-          </p>
         </div>
       </div>
     </div>

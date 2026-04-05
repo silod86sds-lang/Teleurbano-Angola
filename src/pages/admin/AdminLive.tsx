@@ -22,9 +22,9 @@ export function AdminLive() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-red-400 to-amber-400 flex items-center gap-3">
-          <Radio className="w-8 h-8 text-red-500" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-red-400 to-amber-400 flex items-center gap-3">
+          <Radio className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 shrink-0" />
           Gerenciar Transmissão ao Vivo
         </h2>
       </div>

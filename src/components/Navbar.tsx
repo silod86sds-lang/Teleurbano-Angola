@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Tv, Radio, Bell, ShieldAlert, LogOut, LogIn, Crown, Info } from 'lucide-react';
+import { Tv, Radio, Bell, ShieldAlert, LogOut, LogIn, Crown, Info, Menu, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { name: 'Ao Vivo', path: '/', icon: Radio },
@@ -29,7 +30,7 @@ export function Navbar() {
                 <img src="https://i.ibb.co/4Z5Vss6p/logo2-png.jpg" alt="Teleurbano Angola tv" className="h-8 w-auto object-contain rounded-md" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling!.style.display = 'block'; }} />
                 <Tv className="h-6 w-6 text-blue-800 hidden" />
               </div>
-              <span className="text-white font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">Teleurbano Angola</span>
+              <span className="text-white font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300 hidden sm:block">Teleurbano Angola</span>
             </Link>
             <div className="hidden md:block ml-10">
               <div className="flex items-baseline space-x-4">
@@ -55,9 +56,9 @@ export function Navbar() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {user ? (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 {!user.isPremium && user.role !== 'admin' && (
                   <Link
                     to="/subscribe"
@@ -67,7 +68,7 @@ export function Navbar() {
                     Seja Premium
                   </Link>
                 )}
-                <div className="flex flex-col items-end">
+                <div className="hidden sm:flex flex-col items-end">
                   <span className="text-sm font-medium text-white">{user.name}</span>
                   <span className="text-xs text-zinc-400">
                     {user.role === 'admin' ? 'Administrador' : user.isPremium ? 'Premium' : 'Gratuito'}
@@ -75,7 +76,7 @@ export function Navbar() {
                 </div>
                 <button
                   onClick={logout}
-                  className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors tv-focusable"
+                  className="hidden sm:block p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors tv-focusable"
                   title="Sair"
                 >
                   <LogOut className="h-5 w-5" />
@@ -84,15 +85,93 @@ export function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors tv-focusable"
+                className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 sm:px-4 rounded-md text-sm font-medium hover:bg-red-700 transition-colors tv-focusable"
               >
                 <LogIn className="h-4 w-4" />
                 Entrar
               </Link>
             )}
+            
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center ml-2">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-slate-300 hover:text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Menu className="block h-6 w-6" aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-slate-900 border-b border-slate-800">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium transition-all duration-300",
+                    isActive
+                      ? "bg-blue-600/20 text-blue-400"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  )}
+                >
+                  <Icon className={cn("h-5 w-5", isActive ? "text-blue-400" : "text-slate-400")} />
+                  {item.name}
+                </Link>
+              );
+            })}
+            
+            {user && !user.isPremium && user.role !== 'admin' && (
+              <Link
+                to="/subscribe"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium text-amber-500 hover:bg-slate-800 transition-all"
+              >
+                <Crown className="h-5 w-5" />
+                Seja Premium
+              </Link>
+            )}
+            
+            {user && (
+              <div className="px-3 py-3 mt-4 border-t border-slate-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="ml-3">
+                      <div className="text-base font-medium leading-none text-white">{user.name}</div>
+                      <div className="text-sm font-medium leading-none text-slate-400 mt-1">
+                        {user.role === 'admin' ? 'Administrador' : user.isPremium ? 'Premium' : 'Gratuito'}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-md transition-colors"
+                    title="Sair"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

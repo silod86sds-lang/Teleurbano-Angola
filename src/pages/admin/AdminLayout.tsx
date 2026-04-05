@@ -30,7 +30,7 @@ export function AdminLayout() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
       <aside className="w-full md:w-64 shrink-0">
-        <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-800 p-4 sticky top-24 shadow-xl">
+        <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-800 p-4 md:sticky md:top-24 shadow-xl">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-red-500 to-amber-500 rounded-t-2xl"></div>
           <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-3 mt-2">
             Painel de Controle
