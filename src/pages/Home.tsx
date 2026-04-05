@@ -1,13 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { Play, Crown, Clock, Search } from 'lucide-react';
+import { Play, Crown, Clock, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export function Home() {
   const { videos } = useData();
   const [searchQuery, setSearchQuery] = useState('');
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const filteredVideos = useMemo(() => {
     return videos.filter(video => 
@@ -15,8 +16,97 @@ export function Home() {
     );
   }, [videos, searchQuery]);
 
+  const featuredVideos = useMemo(() => {
+    // Just taking the first 5 videos as featured for now
+    return videos.slice(0, 5);
+  }, [videos]);
+
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.clientWidth * 0.8;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Featured Carousel */}
+      {!searchQuery && featuredVideos.length > 0 && (
+        <div className="mb-12 relative group">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <Crown className="w-6 h-6 text-amber-400" />
+            Em Destaque
+          </h2>
+          
+          <div className="relative">
+            <button 
+              onClick={() => scrollCarousel('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 tv-focusable"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            
+            <div 
+              ref={carouselRef}
+              className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 pt-2 hide-scrollbar scroll-smooth"
+            >
+              {featuredVideos.map((video) => (
+                <Link
+                  key={`featured-${video.id}`}
+                  to={`/video/${video.id}`}
+                  className="flex-none w-[85vw] sm:w-[60vw] md:w-[45vw] lg:w-[35vw] snap-center group/item relative rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgba(59,130,246,0.3)] tv-focusable"
+                >
+                  <div className="aspect-[16/9] relative bg-slate-800">
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group/item-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent opacity-80 group-hover/item:opacity-90 transition-opacity"></div>
+                    
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-all duration-300">
+                      <div className="bg-blue-600/90 backdrop-blur-sm rounded-full p-5 transform scale-50 group-hover/item:scale-100 transition-transform duration-300 shadow-[0_0_30px_rgba(37,99,235,0.6)]">
+                        <Play className="w-10 h-10 text-white fill-current ml-1" />
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      {video.isPremium && (
+                        <div className="mb-3 inline-flex bg-gradient-to-r from-amber-400 to-orange-500 text-black text-xs font-bold px-3 py-1.5 rounded-full items-center gap-1.5 shadow-lg shadow-orange-500/30">
+                          <Crown className="w-3.5 h-3.5" />
+                          PREMIUM
+                        </div>
+                      )}
+                      <h3 className="text-2xl font-bold text-white line-clamp-2 mb-2 group-hover/item:text-blue-400 transition-colors">
+                        {video.title}
+                      </h3>
+                      <p className="text-sm text-slate-300 line-clamp-2 mb-3">
+                        {video.description}
+                      </p>
+                      <div className="flex items-center text-xs text-slate-400 gap-1.5 font-medium">
+                        <Clock className="w-4 h-4 text-blue-500" />
+                        {formatDistanceToNow(video.createdAt, { addSuffix: true, locale: ptBR })}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => scrollCarousel('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0 tv-focusable"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-red-400 to-amber-400">
           Conteúdos Nacionais - Angola
