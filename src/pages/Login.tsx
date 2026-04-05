@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Tv, LogIn } from 'lucide-react';
+import { Tv, LogIn, AlertCircle } from 'lucide-react';
 
 export function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
     try {
       await login();
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed", error);
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+        setErrorMsg("O pop-up de login foi bloqueado. Por favor, abra o aplicativo em uma nova guia ou permita pop-ups no seu navegador.");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setErrorMsg("Este domínio não está autorizado no Firebase. Adicione este domínio na aba Authentication > Settings > Authorized domains no console do Firebase.");
+      } else {
+        setErrorMsg(`Erro ao fazer login: ${error.message || 'Erro desconhecido'}`);
+      }
     }
   };
 
@@ -32,6 +41,14 @@ export function Login() {
             Acesse seus conteúdos favoritos
           </p>
         </div>
+        
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex items-start gap-3 mt-6">
+            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-200">{errorMsg}</p>
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div>
             <button

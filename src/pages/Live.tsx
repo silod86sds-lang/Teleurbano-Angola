@@ -1,6 +1,7 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { Radio, Users } from 'lucide-react';
+import { CustomVideoPlayer } from '../components/CustomVideoPlayer';
 
 export function Live() {
   const { liveStream } = useData();
@@ -27,25 +28,11 @@ export function Live() {
         <div className="lg:col-span-2">
           <div className="bg-black rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] aspect-video relative border border-slate-800 ring-1 ring-white/5">
             {liveStream.isLive ? (
-              liveStream.url.match(/\.(mp4|m3u8|webm|ogg)$/i) ? (
-                <video
-                  src={liveStream.url}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain tv-focusable"
-                  tabIndex={0}
-                >
-                  Seu navegador não suporta o elemento de vídeo.
-                </video>
-              ) : (
-                <iframe
-                  src={liveStream.url}
-                  className="w-full h-full border-0 tv-focusable"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  tabIndex={0}
-                ></iframe>
-              )
+              <CustomVideoPlayer 
+                url={liveStream.url} 
+                autoPlay={true} 
+                className="w-full h-full object-contain tv-focusable" 
+              />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm text-center p-6">
                 <Radio className="w-16 h-16 text-slate-600 mb-4" />

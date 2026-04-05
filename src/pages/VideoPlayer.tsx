@@ -3,6 +3,7 @@ import { useParams, Navigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { Crown, Lock } from 'lucide-react';
+import { CustomVideoPlayer } from '../components/CustomVideoPlayer';
 
 export function VideoPlayer() {
   const { id } = useParams<{ id: string }>();
@@ -21,16 +22,11 @@ export function VideoPlayer() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-black rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] aspect-video relative border border-slate-800 ring-1 ring-white/5">
         {canWatch ? (
-          <video
-            src={video.url}
-            controls
-            autoPlay
+          <CustomVideoPlayer
+            url={video.url}
+            autoPlay={true}
             className="w-full h-full object-contain tv-focusable"
-            poster={video.thumbnailUrl}
-            tabIndex={0}
-          >
-            Seu navegador não suporta o elemento de vídeo.
-          </video>
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md text-center p-6">
             <div className="bg-slate-800/50 p-5 rounded-full mb-6 shadow-[0_0_30px_rgba(0,0,0,0.3)] ring-1 ring-white/10">

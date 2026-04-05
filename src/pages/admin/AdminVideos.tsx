@@ -55,8 +55,13 @@ export function AdminVideos() {
             }
           );
         });
-      } catch (error) {
-        alert('Erro ao fazer upload do vídeo. Tente novamente.');
+      } catch (error: any) {
+        console.error("Upload failed:", error);
+        if (error.code === 'storage/unauthorized') {
+          alert('Erro de permissão: Você não tem permissão para fazer upload. Verifique as regras de segurança do Firebase Storage no console do Firebase.');
+        } else {
+          alert(`Erro ao fazer upload do vídeo: ${error.message || 'Tente novamente.'}`);
+        }
         setIsUploading(false);
         return;
       }
