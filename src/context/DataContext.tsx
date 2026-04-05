@@ -85,10 +85,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [videos, setVideos] = useState<Video[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [liveStream, setLiveStream] = useState<LiveStream>({
-    isLive: false,
-    title: '',
-    description: '',
-    url: '',
+    isLive: true,
+    title: 'TELEURBANO ANGOLA Ao Vivo',
+    description: 'Acompanhe a nossa programação ao vivo.',
+    url: 'https://vdo.ninja/?view=W9kTD5t',
   });
   
   const { isAuthReady, user } = useAuth();
