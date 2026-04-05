@@ -14,7 +14,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isAuthReady: boolean;
-  login: () => Promise<void>;
+  login: (email: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   upgradeToPremium: () => Promise<void>;
 }
@@ -37,16 +37,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthReady(true);
   }, []);
 
-  const login = async () => {
-    // Mock login as admin
-    const mockUser: User = {
-      id: 'mock-admin-id',
-      name: 'Admin User',
-      email: 'silod86.sds@gmail.com',
-      role: 'admin',
-      isPremium: true,
-      createdAt: Date.now(),
-    };
+  const login = async (email: string, password?: string) => {
+    let mockUser: User;
+
+    if (email === 'Teleurbano@admnistra' && password === '1992') {
+      mockUser = {
+        id: 'admin-' + Date.now(),
+        name: 'Administrador',
+        email: email,
+        role: 'admin',
+        isPremium: true,
+        createdAt: Date.now(),
+      };
+    } else {
+      mockUser = {
+        id: 'user-' + Date.now(),
+        name: email.split('@')[0],
+        email: email,
+        role: 'user',
+        isPremium: false,
+        createdAt: Date.now(),
+      };
+    }
+    
     setUser(mockUser);
     localStorage.setItem('mock_user', JSON.stringify(mockUser));
   };

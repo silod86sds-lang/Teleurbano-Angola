@@ -1,28 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Tv, LogIn, AlertCircle } from 'lucide-react';
+import { Tv, LogIn, AlertCircle, User as UserIcon, Shield } from 'lucide-react';
 
 export function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loginType, setLoginType] = useState<'user' | 'admin'>('user');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     try {
-      await login();
+      if (loginType === 'admin') {
+        if (email !== 'Teleurbano@admnistra' || password !== '1992') {
+          throw new Error('Credenciais de administrador inválidas.');
+        }
+        await login(email, password);
+      } else {
+        if (!email || !email.includes('@')) {
+          throw new Error('Por favor, insira um e-mail válido.');
+        }
+        await login(email);
+      }
       navigate('/');
     } catch (error: any) {
       console.error("Login failed", error);
-      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-        setErrorMsg("O pop-up de login foi bloqueado. Por favor, abra o aplicativo em uma nova guia ou permita pop-ups no seu navegador.");
-      } else if (error.code === 'auth/unauthorized-domain') {
-        setErrorMsg("Este domínio não está autorizado no Firebase. Adicione este domínio na aba Authentication > Settings > Authorized domains no console do Firebase.");
-      } else {
-        setErrorMsg(`Erro ao fazer login: ${error.message || 'Erro desconhecido'}`);
-      }
+      setErrorMsg(error.message || 'Erro ao fazer login');
     }
   };
 
@@ -49,18 +56,53 @@ export function Login() {
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-blue-500/30 hover:-translate-y-0.5 tv-focusable"
-            >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-4">
-                <LogIn className="h-5 w-5 text-blue-300 group-hover:text-white transition-colors" aria-hidden="true" />
-              </span>
-              Entrar com Google
-            </button>
-          </div>
+        <div className="flex bg-slate-950 border border-slate-700 rounded-xl p-1 mt-6">
+          <button
+            type="button"
+            onClick={() => { setLoginType('user'); setErrorMsg(null); setEmail(''); setPassword(''); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all tv-focusable ${loginType === 'user' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <UserIcon className="w-4 h-4" />
+            Usuário
+          </button>
+          <button
+            type="button"
+            onClick={() => { setLoginType('admin'); setErrorMsg(null); setEmail(''); setPassword(''); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all tv-focusable ${loginType === 'admin' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Shield className="w-4 h-4" />
+            Administrador
+          </button>
+        </div>
+
+        <form className="mt-6 space-y-4" onSubmit={handleLogin}>
+          {loginType === 'admin' ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1.5">Código de Acesso</label>
+                <input required type="text" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable" placeholder="Ex: Teleurbano@admnistra" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1.5">Palavra-passe</label>
+                <input required type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable" placeholder="••••" />
+              </div>
+            </>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Seu E-mail</label>
+              <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all tv-focusable" placeholder="seu@email.com" />
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="group relative w-full flex justify-center py-3.5 px-4 mt-6 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-blue-500/30 hover:-translate-y-0.5 tv-focusable"
+          >
+            <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+              <LogIn className="h-5 w-5 text-blue-300 group-hover:text-white transition-colors" aria-hidden="true" />
+            </span>
+            {loginType === 'admin' ? 'Entrar como Administrador' : 'Acessar Conteúdos'}
+          </button>
         </form>
       </div>
     </div>
