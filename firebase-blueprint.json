@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "isPremium": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name", "email", "role", "isPremium", "createdAt"]
+    },
+    "Video": {
+      "title": "Video",
+      "description": "A video available on the platform",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "url": { "type": "string" },
+        "thumbnailUrl": { "type": "string" },
+        "isPremium": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["title", "description", "url", "thumbnailUrl", "isPremium", "createdAt"]
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "A system notice or announcement",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "author": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["title", "content", "author", "createdAt"]
+    },
+    "LiveStream": {
+      "title": "LiveStream",
+      "description": "Current live stream settings",
+      "type": "object",
+      "properties": {
+        "isLive": { "type": "boolean" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["isLive", "title", "description", "url"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/videos/{videoId}": {
+      "schema": { "$ref": "#/entities/Video" },
+      "description": "Video catalog"
+    },
+    "/notices/{noticeId}": {
+      "schema": { "$ref": "#/entities/Notice" },
+      "description": "System notices"
+    },
+    "/settings/liveStream": {
+      "schema": { "$ref": "#/entities/LiveStream" },
+      "description": "Live stream configuration"
+    }
+  }
+}

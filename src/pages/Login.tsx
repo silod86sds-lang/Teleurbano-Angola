@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, Role } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { Tv, LogIn } from 'lucide-react';
 
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState<Role>('user');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      login(email, role);
+    try {
+      await login();
       navigate('/');
+    } catch (error) {
+      console.error("Login failed", error);
     }
   };
 
@@ -32,43 +32,7 @@ export function Login() {
             Acesse seus conteúdos favoritos
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-5">
-            <div>
-              <label htmlFor="email-address" className="block text-sm font-bold text-slate-300 mb-2">
-                Endereço de Email
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-4 py-3 border border-slate-700 bg-slate-950 placeholder-slate-500 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-all shadow-inner tv-focusable"
-                placeholder="seu@email.com"
-              />
-              <p className="mt-2 text-xs text-slate-500 font-medium">
-                Dica: Use <span className="text-blue-400">admin@webtv.com</span> para acessar o painel.
-              </p>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-bold text-slate-300 mb-2">
-                Tipo de Conta (Simulação)
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className="appearance-none relative block w-full px-4 py-3 border border-slate-700 bg-slate-950 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-inner tv-focusable"
-              >
-                <option value="user">Usuário Comum</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-          </div>
-
+        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div>
             <button
               type="submit"
@@ -77,7 +41,7 @@ export function Login() {
               <span className="absolute left-0 inset-y-0 flex items-center pl-4">
                 <LogIn className="h-5 w-5 text-blue-300 group-hover:text-white transition-colors" aria-hidden="true" />
               </span>
-              Entrar
+              Entrar com Google
             </button>
           </div>
         </form>

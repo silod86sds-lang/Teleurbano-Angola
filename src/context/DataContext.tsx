@@ -1,4 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { 
+  collection, 
+  doc, 
+  onSnapshot, 
+  addDoc, 
+  deleteDoc, 
+  updateDoc,
+  setDoc,
+  query,
+  orderBy
+} from 'firebase/firestore';
+import { useAuth } from './AuthContext';
 
 export interface Video {
   id: string;
@@ -29,125 +42,143 @@ interface DataContextType {
   videos: Video[];
   notices: Notice[];
   liveStream: LiveStream;
-  addVideo: (video: Omit<Video, 'id' | 'createdAt'>) => void;
-  deleteVideo: (id: string) => void;
-  addNotice: (notice: Omit<Notice, 'id' | 'createdAt'>) => void;
-  deleteNotice: (id: string) => void;
-  updateLiveStream: (data: Partial<LiveStream>) => void;
+  addVideo: (video: Omit<Video, 'id' | 'createdAt'>) => Promise<void>;
+  deleteVideo: (id: string) => Promise<void>;
+  addNotice: (notice: Omit<Notice, 'id' | 'createdAt'>) => Promise<void>;
+  deleteNotice: (id: string) => Promise<void>;
+  updateLiveStream: (data: Partial<LiveStream>) => Promise<void>;
 }
-
-const INITIAL_VIDEOS: Video[] = [
-  {
-    id: 'v1',
-    title: 'Notícias de Luanda: Atualizações',
-    description: 'As principais notícias da capital angolana e do país.',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    thumbnailUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Luanda_-_Angola_%2840656123953%29.jpg/800px-Luanda_-_Angola_%2840656123953%29.jpg', // Real image of Luanda Marginal
-    isPremium: false,
-    createdAt: Date.now() - 100000,
-  },
-  {
-    id: 'v2',
-    title: 'Conteúdos Exclusivos',
-    description: 'Uma seleção exclusiva com os melhores hits de Kuduro de Angola.',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1533147670608-2a2f9775d3a4?w=800&q=80', // Dance/Music vibe
-    isPremium: true,
-    createdAt: Date.now() - 50000,
-  },
-  {
-    id: 'v3',
-    title: 'Documentário: As Maravilhas de Malanje',
-    description: 'Explore as belezas naturais da província de Malanje, incluindo as Quedas de Kalandula.',
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&q=80', // Waterfall/Nature vibe
-    isPremium: false,
-    createdAt: Date.now() - 200000,
-  }
-];
-
-const INITIAL_NOTICES: Notice[] = [
-  {
-    id: 'n1',
-    title: 'Manutenção Programada',
-    content: 'Teremos uma manutenção no servidor hoje às 23h. O serviço pode ficar instável por 30 minutos.',
-    createdAt: Date.now() - 86400000,
-    author: 'Admin',
-  },
-  {
-    id: 'n2',
-    title: 'Novo Plano Premium',
-    content: 'Assine agora para ter acesso a conteúdos exclusivos e sem anúncios!',
-    createdAt: Date.now() - 172800000,
-    author: 'Equipe Web TV',
-  }
-];
-
-const INITIAL_LIVE: LiveStream = {
-  isLive: true,
-  title: 'TELEURBANO ANGOLA Ao Vivo',
-  description: 'Acompanhe a nossa programação ao vivo.',
-  url: 'https://vdo.ninja/?view=W9kTD5t',
-};
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: any;
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, user: any) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: user?.id,
+      email: user?.email,
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [videos, setVideos] = useState<Video[]>(() => {
-    const saved = localStorage.getItem('webtv_videos_v7');
-    return saved ? JSON.parse(saved) : INITIAL_VIDEOS;
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [liveStream, setLiveStream] = useState<LiveStream>({
+    isLive: false,
+    title: '',
+    description: '',
+    url: '',
   });
-
-  const [notices, setNotices] = useState<Notice[]>(() => {
-    const saved = localStorage.getItem('webtv_notices_v2');
-    return saved ? JSON.parse(saved) : INITIAL_NOTICES;
-  });
-
-  const [liveStream, setLiveStream] = useState<LiveStream>(() => {
-    const saved = localStorage.getItem('webtv_live_v4');
-    return saved ? JSON.parse(saved) : INITIAL_LIVE;
-  });
+  
+  const { isAuthReady, user } = useAuth();
 
   useEffect(() => {
-    localStorage.setItem('webtv_videos_v7', JSON.stringify(videos));
-  }, [videos]);
+    if (!isAuthReady) return;
 
-  useEffect(() => {
-    localStorage.setItem('webtv_notices_v2', JSON.stringify(notices));
-  }, [notices]);
+    const qVideos = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
+    const unsubVideos = onSnapshot(qVideos, (snapshot) => {
+      const vids: Video[] = [];
+      snapshot.forEach((doc) => {
+        vids.push({ id: doc.id, ...doc.data() } as Video);
+      });
+      setVideos(vids);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'videos', user);
+    });
 
-  useEffect(() => {
-    localStorage.setItem('webtv_live_v4', JSON.stringify(liveStream));
-  }, [liveStream]);
+    const qNotices = query(collection(db, 'notices'), orderBy('createdAt', 'desc'));
+    const unsubNotices = onSnapshot(qNotices, (snapshot) => {
+      const nots: Notice[] = [];
+      snapshot.forEach((doc) => {
+        nots.push({ id: doc.id, ...doc.data() } as Notice);
+      });
+      setNotices(nots);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'notices', user);
+    });
 
-  const addVideo = (video: Omit<Video, 'id' | 'createdAt'>) => {
-    const newVideo: Video = {
-      ...video,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: Date.now(),
+    const liveRef = doc(db, 'settings', 'liveStream');
+    const unsubLive = onSnapshot(liveRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setLiveStream(docSnap.data() as LiveStream);
+      }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'settings/liveStream', user);
+    });
+
+    return () => {
+      unsubVideos();
+      unsubNotices();
+      unsubLive();
     };
-    setVideos([newVideo, ...videos]);
+  }, [isAuthReady, user]);
+
+  const addVideo = async (video: Omit<Video, 'id' | 'createdAt'>) => {
+    try {
+      await addDoc(collection(db, 'videos'), {
+        ...video,
+        createdAt: Date.now(),
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'videos', user);
+    }
   };
 
-  const deleteVideo = (id: string) => {
-    setVideos(videos.filter(v => v.id !== id));
+  const deleteVideo = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'videos', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `videos/${id}`, user);
+    }
   };
 
-  const addNotice = (notice: Omit<Notice, 'id' | 'createdAt'>) => {
-    const newNotice: Notice = {
-      ...notice,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: Date.now(),
-    };
-    setNotices([newNotice, ...notices]);
+  const addNotice = async (notice: Omit<Notice, 'id' | 'createdAt'>) => {
+    try {
+      await addDoc(collection(db, 'notices'), {
+        ...notice,
+        createdAt: Date.now(),
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, 'notices', user);
+    }
   };
 
-  const deleteNotice = (id: string) => {
-    setNotices(notices.filter(n => n.id !== id));
+  const deleteNotice = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'notices', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `notices/${id}`, user);
+    }
   };
 
-  const updateLiveStream = (data: Partial<LiveStream>) => {
-    setLiveStream({ ...liveStream, ...data });
+  const updateLiveStream = async (data: Partial<LiveStream>) => {
+    try {
+      const liveRef = doc(db, 'settings', 'liveStream');
+      await setDoc(liveRef, { ...liveStream, ...data }, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'settings/liveStream', user);
+    }
   };
 
   return (

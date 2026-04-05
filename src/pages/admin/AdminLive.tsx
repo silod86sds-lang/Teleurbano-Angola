@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Radio, Save } from 'lucide-react';
 
@@ -6,10 +6,18 @@ export function AdminLive() {
   const { liveStream, updateLiveStream } = useData();
   const [formData, setFormData] = useState(liveStream);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    setFormData(liveStream);
+  }, [liveStream]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateLiveStream(formData);
-    alert('Configurações da transmissão ao vivo atualizadas!');
+    try {
+      await updateLiveStream(formData);
+      alert('Configurações da transmissão ao vivo atualizadas!');
+    } catch (error) {
+      alert('Erro ao atualizar configurações.');
+    }
   };
 
   return (

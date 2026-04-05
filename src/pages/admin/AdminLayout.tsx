@@ -1,12 +1,20 @@
 import React from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Video, Radio, Users, LayoutDashboard, Crown } from 'lucide-react';
+import { Video, Radio, Users, LayoutDashboard, Crown, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function AdminLayout() {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   const location = useLocation();
+
+  if (!isAuthReady) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (!user || user.role !== 'admin') {
     return <Navigate to="/videos" />;

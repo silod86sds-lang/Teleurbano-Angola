@@ -1,0 +1,162 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (matches auth.uid)
+    // Fields:
+    //   - name: string (required)
+    //   - email: string (required)
+    //   - role: string (required, 'admin' or 'user')
+    //   - isPremium: boolean (required)
+    //   - createdAt: number (required)
+    //
+    // Collection: videos
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - url: string (required)
+    //   - thumbnailUrl: string (required)
+    //   - isPremium: boolean (required)
+    //   - createdAt: number (required)
+    //
+    // Collection: notices
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required)
+    //   - content: string (required)
+    //   - author: string (required)
+    //   - createdAt: number (required)
+    //
+    // Collection: settings
+    // Document ID: 'liveStream'
+    // Fields:
+    //   - isLive: boolean (required)
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - url: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+        (request.auth.token.email == "silod86.sds@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function hasOnlyAllowedFields(allowedFields) {
+      return request.resource.data.keys().hasOnly(allowedFields);
+    }
+
+    function isValidString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['name', 'email', 'role', 'isPremium', 'createdAt']) &&
+             isValidString(data.name, 1, 100) &&
+             isValidString(data.email, 3, 150) &&
+             data.role in ['admin', 'user'] &&
+             data.isPremium is bool &&
+             data.createdAt is number;
+    }
+
+    function isValidVideo() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['title', 'description', 'url', 'thumbnailUrl', 'isPremium', 'createdAt']) &&
+             isValidString(data.title, 1, 200) &&
+             isValidString(data.description, 0, 2000) &&
+             isValidString(data.url, 1, 1000) &&
+             isValidString(data.thumbnailUrl, 1, 1000) &&
+             data.isPremium is bool &&
+             data.createdAt is number;
+    }
+
+    function isValidNotice() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['title', 'content', 'author', 'createdAt']) &&
+             isValidString(data.title, 1, 200) &&
+             isValidString(data.content, 1, 2000) &&
+             isValidString(data.author, 1, 100) &&
+             data.createdAt is number;
+    }
+
+    function isValidLiveStream() {
+      let data = request.resource.data;
+      return hasOnlyAllowedFields(['isLive', 'title', 'description', 'url']) &&
+             data.isLive is bool &&
+             isValidString(data.title, 1, 200) &&
+             isValidString(data.description, 0, 2000) &&
+             isValidString(data.url, 0, 1000);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can create their own profile, but cannot make themselves admin unless they are the default admin
+      allow create: if isAuthenticated() && 
+                    isOwner(userId) && 
+                    isValidUser() && 
+                    (request.resource.data.role == 'user' || isAdmin());
+                    
+      // Users can update their own profile, but cannot change their role or premium status. Admins can do anything.
+      allow update: if isAuthenticated() && 
+                    isValidUser() && 
+                    (
+                      isAdmin() || 
+                      (isOwner(userId) && 
+                       request.resource.data.role == resource.data.role &&
+                       request.resource.data.isPremium == resource.data.isPremium &&
+                       request.resource.data.createdAt == resource.data.createdAt)
+                    );
+                    
+      allow delete: if isAdmin();
+    }
+
+    match /videos/{videoId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidVideo();
+      allow delete: if isAdmin();
+    }
+
+    match /notices/{noticeId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidNotice();
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && settingId == 'liveStream' && isValidLiveStream();
+      allow delete: if isAdmin();
+    }
+  }
+}

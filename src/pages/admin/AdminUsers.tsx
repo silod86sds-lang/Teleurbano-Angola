@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Crown } from 'lucide-react';
+import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { User } from '../../context/AuthContext';
 
 export function AdminUsers() {
-  // Mock users for demonstration
-  const mockUsers = [
-    { id: '1', name: 'Admin User', email: 'admin@webtv.com', role: 'admin', isPremium: true, joinDate: '2023-01-15' },
-    { id: '2', name: 'João Silva', email: 'joao@example.com', role: 'user', isPremium: true, joinDate: '2023-05-20' },
-    { id: '3', name: 'Maria Souza', email: 'maria@example.com', role: 'user', isPremium: false, joinDate: '2023-08-10' },
-    { id: '4', name: 'Pedro Santos', email: 'pedro@example.com', role: 'user', isPremium: false, joinDate: '2023-11-05' },
-  ];
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const usersData: User[] = [];
+      snapshot.forEach((doc) => {
+        usersData.push({ id: doc.id, ...doc.data() } as User);
+      });
+      setUsers(usersData);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching users:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -31,42 +46,56 @@ export function AdminUsers() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/50">
-            {mockUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-slate-800/30 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
-                      {user.name.charAt(0)}
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-bold text-slate-100">{user.name}</div>
-                      <div className="text-sm text-slate-500">{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {user.isPremium ? (
-                    <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 items-center gap-1.5 shadow-sm">
-                      <Crown className="w-3.5 h-3.5" /> Premium
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-slate-800 text-slate-300 border border-slate-700 shadow-sm">
-                      Gratuito
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 font-medium">
-                  {user.role === 'admin' ? (
-                    <span className="text-red-400">Administrador</span>
-                  ) : (
-                    <span>Usuário</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                  {new Date(user.joinDate).toLocaleDateString('pt-BR')}
+            {loading ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
+                  Carregando usuários...
                 </td>
               </tr>
-            ))}
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
+                  Nenhum usuário encontrado.
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr key={user.id} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
+                        {user.name ? user.name.charAt(0).toUpperCase() : '?'}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-bold text-slate-100">{user.name}</div>
+                        <div className="text-sm text-slate-500">{user.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {user.isPremium ? (
+                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 items-center gap-1.5 shadow-sm">
+                        <Crown className="w-3.5 h-3.5" /> Premium
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-slate-800 text-slate-300 border border-slate-700 shadow-sm">
+                        Gratuito
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 font-medium">
+                    {user.role === 'admin' ? (
+                      <span className="text-red-400">Administrador</span>
+                    ) : (
+                      <span>Usuário</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '-'}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

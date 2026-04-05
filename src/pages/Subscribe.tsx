@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Crown, CheckCircle2 } from 'lucide-react';
@@ -6,15 +6,24 @@ import { Crown, CheckCircle2 } from 'lucide-react';
 export function Subscribe() {
   const { user, upgradeToPremium } = useAuth();
   const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!user) {
       navigate('/login');
       return;
     }
-    upgradeToPremium();
-    alert('Assinatura Premium ativada com sucesso! (Simulação)');
-    navigate('/');
+    setIsProcessing(true);
+    try {
+      await upgradeToPremium();
+      alert('Assinatura Premium ativada com sucesso!');
+      navigate('/');
+    } catch (error) {
+      console.error("Subscription failed:", error);
+      alert("Ocorreu um erro ao processar sua assinatura. Tente novamente.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const features = [
@@ -70,14 +79,24 @@ export function Subscribe() {
           ) : (
             <button
               onClick={handleSubscribe}
-              className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 tv-focusable"
+              disabled={isProcessing}
+              className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_40px_rgba(245,158,11,0.6)] hover:-translate-y-1 flex items-center justify-center gap-2 tv-focusable disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
             >
-              <Crown className="w-6 h-6" />
-              Assinar Agora
+              {isProcessing ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Processando...
+                </span>
+              ) : (
+                <>
+                  <Crown className="w-6 h-6" />
+                  Assinar Agora
+                </>
+              )}
             </button>
           )}
           <p className="text-center text-sm text-slate-500 mt-6 font-medium">
-            Cancele a qualquer momento. Simulação de pagamento.
+            Cancele a qualquer momento.
           </p>
         </div>
       </div>
